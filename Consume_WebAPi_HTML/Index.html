@@ -1,0 +1,157 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Consume Web API using HTML & Ajax</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+   
+</head>
+<body>
+    <h1>Consume Web API using HTML & Ajax</h1>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 col-sm-12">
+                <table class="table table-bordered" id="tble">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Contact</th>
+                            <th>..</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-md-6 col-sm-12">
+                 
+                <div class="mb-3">
+                    <input type="text" class="form-control" id="txtId"  disabled>
+                    <label for="exampleInputEmail1" class="form-label">Name</label>
+                    <input type="text" class="form-control" id="txtName" aria-describedby="emailHelp">
+
+                </div>
+                    <div class="mb-3">
+                        <label for="exampleInputPassword1" class="form-label">Contact</label>
+                        <input type="text" class="form-control" id="txtcontact">
+                    </div>
+                    
+                    <button type="button"  id="btnsave" class="btn btn-primary">Submit</button>
+               
+            </div>
+        </div>
+    </div>
+   
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            load();
+            isEdit = false;
+            $("#btnsave").click(function () {
+                console.log(isEdit)
+                if (isEdit) {
+                    update();
+                }
+                else {
+                    save();
+                }
+            })
+        })
+        function cleardata() {
+            $("#txtName").val(' '),
+                $("#txtcontact").val(' ')
+                $("#txtId").val('')
+        }
+        function update() {
+            var obj = { Id: $("#txtId").val(), Name: $("#txtName").val(), Contact: $("#txtcontact").val() }
+            $.ajax({
+                url: `https://localhost:44385/api/Clients/${$("#txtId").val() }`,
+                method: "PUT",
+                data: obj,
+                success: function (res) {
+                    console.log(res)
+                    load();
+                    cleardata();
+                },
+                error: function (er) {
+                    console.log(er)
+                }
+            })
+        }
+        function save() {
+        var obj = { Name: $("#txtName").val(), Contact: $("#txtcontact").val() }
+            $.ajax({
+                url: "https://localhost:44385/api/Clients",
+                method: "POST",
+                data: obj,
+                success: function (res) {
+                    console.log(res)
+                    load();
+                    cleardata();
+                },
+                error: function (er) {
+                    console.log(er)
+                }
+            })
+        }
+        function edit(id) {
+            isEdit = true;
+           console.log(id)
+             
+            $.ajax({
+                url: "https://localhost:44385/api/Clients/"+id,
+                method: "GET",
+                success: function (res) {
+                    console.log(res)
+                    $("#txtName").val(res.Name),
+                        $("#txtcontact").val(res.Contact)
+                    $("#txtId").val(res.Id)
+                },
+                error: function (er) {
+                    console.log(er)
+                }
+            })
+        }
+        function deletedata(id) {
+            $.ajax({
+                url: "https://localhost:44385/api/Clients/" + id,
+                method: "DELETE",
+                success: function (res) {
+                    console.log(res)
+                    load()
+                },
+                error: function (er) {
+                    console.log(er)
+                }
+            })
+        }
+        function load() {
+            $.ajax({
+                url: "https://localhost:44385/api/Clients",
+                method: "GET",
+                success: function (res) {
+                    console.log(res)
+                    let table = "";
+                    $.each(res, function (i, v) {
+                        table += `<tr><td>${v.Name}</td>
+                      <td>${v.Contact}</td>
+                      <td><button type="button"  id="btnedit" onclick="edit( ${v.Id})" class="btn btn-primary">Edit</button>
+                      <button type="button"  id="btndel" onclick="deletedata(${v.Id})" class="btn btn-primary">Delete</button>
+                      </td>             </tr > `
+                    })
+                    console.log(table)
+                    $("#tble tbody").empty();
+                    $("#tble tbody").append(table);
+                },
+                error: function (er) {
+                    console.log(er)
+                }
+            })
+        }
+    </script>
+
+</body>
+</html>
